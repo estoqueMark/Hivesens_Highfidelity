@@ -1,605 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>HiveSense — Mobile Beekeeping Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --honey:#F5A623;--honey-deep:#D4861A;--amber:#FFC85C;
-  --dark:#161009;--panel:#1E1608;--panel-light:#2A1E0C;--panel-hover:#332610;
-  --text:#F5EDD8;--text-muted:#A8956B;--text-dim:#6B5A3A;
-  --border:rgba(245,166,35,0.15);--border-hover:rgba(245,166,35,0.35);
-  --success:#52C97A;--danger:#E05252;--info:#4facfe;
-}
-body{background:#161009;font-family:system-ui,sans-serif;padding:16px}
-.wf{display:flex;height:720px;border:1px solid var(--border-hover);border-radius:14px;overflow:hidden;background:var(--dark)}
-.sb{width:224px;background:var(--panel);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
-.sb-logo{display:flex;align-items:center;gap:10px;padding:20px 18px 16px;border-bottom:1px solid var(--border)}
-.logo-hex{width:32px;height:32px;background:rgba(245,166,35,0.18);border:1px solid rgba(245,166,35,0.4);clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;font-size:16px}
-.logo-name{font-size:15px;font-weight:700;color:var(--honey);letter-spacing:.04em}
-.sb-sec{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 6px;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);cursor:pointer}
-.sb-sec:hover{color:var(--honey)}
-.cog-btn{width:22px;height:22px;border-radius:5px;background:var(--panel-light);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer}
-.cog-inner{width:9px;height:9px;border-radius:50%;border:2px solid var(--text-dim)}
-.hv-item{display:flex;align-items:center;gap:10px;padding:10px 14px;margin:3px 8px;border-radius:10px;cursor:pointer;border:1px solid transparent;transition:all .15s}
-.hv-item:hover{background:var(--panel-light)}
-.hv-item.active{background:var(--panel-hover);border-color:var(--border-hover);position:relative}
-.hv-item.active::before{content:'';position:absolute;left:0;top:22%;bottom:22%;width:3px;background:var(--honey);border-radius:0 3px 3px 0;box-shadow:0 0 8px rgba(245,166,35,0.5)}
-.hv-hex{width:34px;height:34px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:var(--panel-light);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.hv-item.active .hv-hex{background:rgba(245,166,35,0.15);border-color:var(--honey)}
-.hv-dot{width:7px;height:7px;border-radius:50%;background:var(--text-dim)}
-.hv-item.active .hv-dot{background:var(--honey)}
-.hv-info{display:flex;flex-direction:column;gap:2px}
-.hv-name{font-size:12px;font-weight:600;color:var(--text)}
-.hv-loc{font-size:10px;color:var(--text-muted)}
-.sb-footer{margin-top:auto;border-top:1px solid var(--border);padding:14px 16px;display:flex;flex-direction:column;gap:9px}
-.cal-btn{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:10px;border:1px solid var(--border);background:var(--panel-light);font-size:11px;color:var(--text-muted);cursor:pointer;transition:all .15s}
-.cal-btn:hover{border-color:var(--border-hover);color:var(--text)}
-.status-row{display:flex;align-items:center;gap:7px}
-.sdot{width:8px;height:8px;border-radius:50%;background:var(--success);flex-shrink:0;box-shadow:0 0 6px rgba(82,201,122,0.5)}
-.stext{font-size:11px;color:var(--text-muted)}
-.lupdate{font-size:10px;color:var(--text-dim)}
-.mn{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#0f0a04}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:20px 26px 16px;background:var(--panel);border-bottom:1px solid var(--border)}
-.page-title{font-size:20px;font-weight:400;color:var(--text);font-family:Georgia,serif}
-.refresh-btn{display:flex;align-items:center;gap:7px;padding:8px 18px;border-radius:10px;border:1px solid var(--border);background:var(--panel-light);font-size:12px;color:var(--text-muted);cursor:pointer;transition:all .15s}
-.refresh-btn:hover{border-color:var(--border-hover);color:var(--text)}
-.ricon{width:13px;height:13px;border:2px solid var(--text-dim);border-radius:50%;border-top-color:transparent}
-.scroll{flex:1;overflow-y:auto;padding:22px 26px;display:flex;flex-direction:column;gap:20px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
-.card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px;display:flex;align-items:center;gap:13px;position:relative;overflow:hidden;cursor:pointer;transition:border-color .15s}
-.card:hover{border-color:var(--border-hover)}
-.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
-.card.t1::before{background:linear-gradient(90deg,#f093fb,#f5576c)}
-.card.t2::before{background:linear-gradient(90deg,#4facfe,#00f2fe)}
-.card.t3::before{background:linear-gradient(90deg,#43e97b,#38f9d7)}
-.card.t4::before{background:linear-gradient(90deg,#fa709a,#fee140)}
-.card-ico{width:42px;height:42px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--border)}
-.card.t1 .card-ico{background:rgba(240,90,251,0.15);border-color:rgba(240,90,251,0.3)}
-.card.t2 .card-ico{background:rgba(79,172,254,0.15);border-color:rgba(79,172,254,0.3)}
-.card.t3 .card-ico{background:rgba(67,233,123,0.15);border-color:rgba(67,233,123,0.3)}
-.card.t4 .card-ico{background:rgba(250,112,154,0.15);border-color:rgba(250,112,154,0.3)}
-.ico-bars{display:flex;flex-direction:column;gap:2px;align-items:center}
-.ico-bars span{display:block;width:3px;border-radius:2px}
-.card.t1 .ico-bars span,.card.t4 .ico-bars span{background:#f5576c}
-.card.t2 .ico-bars span{background:#4facfe}
-.card.t3 .ico-bars span{background:#43e97b}
-.card-body{display:flex;flex-direction:column;gap:2px}
-.c-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted)}
-.c-val{font-size:24px;font-weight:700;color:var(--text);line-height:1}
-.c-unit{font-size:12px;color:var(--text-muted)}
-.c-time{font-size:9px;color:var(--text-dim);margin-top:2px}
-.sec-box{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px 22px}
-.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.sec-title{font-size:14px;font-weight:600;color:var(--text);font-family:Georgia,serif}
-.btn-grp{display:flex;gap:5px}
-.dbtn{padding:5px 12px;border-radius:7px;border:1px solid var(--border);background:var(--panel-light);font-size:10px;color:var(--text-muted);cursor:pointer;transition:all .15s}
-.dbtn:hover{border-color:var(--border-hover);color:var(--text)}
-.dbtn.active{background:linear-gradient(135deg,var(--honey),var(--honey-deep));border-color:transparent;color:var(--dark);font-weight:700}
-.chart-wrap{height:210px;border-radius:8px;background:var(--panel-light);border:1px solid var(--border);position:relative;overflow:hidden}
-.chart-svg{position:absolute;inset:0;width:100%;height:100%}
-.chart-legend{position:absolute;bottom:10px;right:14px;display:flex;gap:14px}
-.leg-item{display:flex;align-items:center;gap:5px;font-size:9px;color:var(--text-muted)}
-.leg-line{width:16px;height:2px;border-radius:1px}
-.tbl-filter{background:#2A1E0C;color:#A8956B;border:1px solid rgba(245,166,35,0.15);border-radius:7px;padding:5px 10px;font-size:10px;outline:none;cursor:pointer}
-.data-table{width:100%;border-collapse:collapse;font-size:11px}
-.data-table th{padding:10px 13px;text-align:left;font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);border-bottom:1px solid var(--border);background:var(--panel-light)}
-.data-table td{padding:10px 13px;border-bottom:1px solid rgba(245,166,35,0.05);color:var(--text-muted);font-size:11px}
-.data-table tr:last-child td{border-bottom:none}
-.data-table tr:hover td{background:var(--panel-light);color:var(--text)}
-.pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:9px;font-weight:600}
-.pill.a{background:rgba(245,166,35,0.15);color:var(--honey);border:1px solid rgba(245,166,35,0.3)}
-.pill.b{background:rgba(79,172,254,0.15);color:#4facfe;border:1px solid rgba(79,172,254,0.3)}
-.pill.g{background:rgba(82,201,122,0.15);color:var(--success);border:1px solid rgba(82,201,122,0.3)}
+        /* CSS Variables (same dark theme) */
+        :root {
+            --dark: #0f0a04;
+            --panel: #1e160c;
+            --panel-light: #2A1E0C;
+            --panel-hover: #2f2412;
+            --honey: #F5A623;
+            --honey-deep: #D98A1C;
+            --text: #EFE0C7;
+            --text-muted: #A8956B;
+            --text-dim: #6B5A3A;
+            --border: rgba(245,166,35,0.15);
+            --border-hover: rgba(245,166,35,0.35);
+            --success: #52C97A;
+            --danger: #E05252;
+            --info: #4facfe;
+        }
 
-/* OVERLAY VIEWS */
-.overlay{display:none;position:absolute;inset:0;background:rgba(0,0,0,0.75);z-index:10;align-items:center;justify-content:center;border-radius:14px}
-.overlay.open{display:flex}
-.modal{background:var(--panel);border:1px solid var(--border-hover);border-radius:16px;width:90%;max-width:700px;overflow:hidden;max-height:90%}
-.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid var(--border)}
-.modal-ttl{font-size:15px;font-weight:400;color:var(--text);display:flex;align-items:center;gap:10px;font-family:Georgia,serif}
-.modal-ttl-icon{color:var(--honey);font-size:14px}
-.mclose{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--panel-light);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--text-muted);cursor:pointer;transition:all .15s}
-.mclose:hover{border-color:var(--danger);color:var(--danger)}
-.hm-form-sec{background:var(--panel-light);border:1px solid var(--border);border-radius:10px;padding:18px;margin:18px 22px 14px}
-.hm-form-label{font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--honey);margin-bottom:12px}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.fg{display:flex;flex-direction:column;gap:5px}
-.fg label{font-size:10px;font-weight:500;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
-.finp{height:32px;border-radius:8px;border:1px solid var(--border);background:var(--panel);padding:0 12px;font-size:11px;color:var(--text);width:100%;outline:none;transition:border-color .15s}
-.finp:focus{border-color:var(--border-hover)}
-.form-actions{display:flex;justify-content:flex-end}
-.btn-primary{display:flex;align-items:center;gap:6px;padding:8px 18px;border-radius:8px;background:linear-gradient(135deg,var(--honey),var(--honey-deep));font-size:12px;font-weight:600;color:var(--dark);cursor:pointer;transition:opacity .15s}
-.btn-primary:hover{opacity:.85}
-.hm-list{padding:0 22px 18px;display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto}
-.hm-item{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border:1px solid var(--border);border-radius:10px;background:var(--panel-light)}
-.hm-item.inactive{opacity:0.45}
-.hmi-name{font-size:12px;font-weight:600;color:var(--text)}
-.hmi-loc{font-size:10px;color:var(--text-muted);margin-top:2px}
-.hmi-badge{display:inline-block;padding:2px 7px;border-radius:20px;font-size:8px;font-weight:600;background:rgba(224,82,82,0.15);color:var(--danger);border:1px solid rgba(224,82,82,0.3);margin-left:8px}
-.hmi-actions{display:flex;gap:5px}
-.hmi-btn{width:30px;height:30px;border-radius:7px;border:1px solid var(--border);background:var(--panel);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-muted);cursor:pointer;transition:all .15s}
-.hmi-btn:hover{background:var(--panel-hover)}
-.hmi-btn.edit{border-color:rgba(245,166,35,0.3);color:var(--honey);background:rgba(245,166,35,0.08)}
-.hmi-btn.del{border-color:rgba(224,82,82,0.3);color:var(--danger);background:rgba(224,82,82,0.08)}
-.hmi-btn.restore{border-color:rgba(82,201,122,0.3);color:var(--success);background:rgba(82,201,122,0.08)}
-.cal-modal-body{display:grid;grid-template-columns:280px 1fr;max-height:calc(90vh - 60px);overflow:hidden}
-.cal-pane{padding:18px;border-right:1px solid var(--border);flex-shrink:0}
-.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-.cal-nav-btn{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:var(--panel-light);display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-muted);cursor:pointer;transition:all .15s}
-.cal-nav-btn:hover{border-color:var(--border-hover);color:var(--text)}
-.cal-month{font-size:13px;font-weight:400;color:var(--text);font-family:Georgia,serif}
-.cal-wdays{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:5px}
-.cal-wday{font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-dim);text-align:center;padding:4px 0}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.cc{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:7px;font-size:10px;color:var(--text-muted);position:relative;border:1px solid transparent;cursor:pointer;transition:all .15s}
-.cc:hover{background:var(--panel-light);color:var(--text)}
-.cc.today{border-color:var(--honey);color:var(--honey);font-weight:700}
-.cc.sel{background:linear-gradient(135deg,var(--honey),var(--honey-deep));color:var(--dark);font-weight:700;border-color:transparent}
-.cc.dot::after{content:'';position:absolute;bottom:3px;width:4px;height:4px;border-radius:50%;background:var(--honey)}
-.cc.sel.dot::after{background:var(--dark)}
-.cc.empty{cursor:default;pointer-events:none}
-.note-pane{padding:18px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
-.note-date-hdr{font-size:13px;font-weight:400;color:var(--honey);padding-bottom:10px;border-bottom:1px solid var(--border);font-family:Georgia,serif}
-.insp-sec-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--honey);padding:5px 0 3px;border-bottom:1px solid rgba(245,166,35,0.18);margin-top:2px}
-.insp-row{display:flex;gap:10px}
-.insp-row .fg{flex:1}
-.ninp{border-radius:7px;border:1px solid var(--border);background:var(--panel);padding:0 10px;font-size:10px;color:var(--text-muted);display:flex;align-items:center;height:28px;width:100%}
-.rating-row{display:flex;gap:3px;margin-top:4px}
-.pip{flex:1;height:22px;border-radius:4px;border:1px solid var(--border);background:var(--panel-light);display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--text-dim);cursor:pointer;transition:all .15s}
-.pip:hover{border-color:var(--border-hover)}
-.pip.on{background:linear-gradient(135deg,var(--honey),var(--honey-deep));border-color:transparent;color:var(--dark);font-weight:600}
-.note-actions{display:flex;justify-content:space-between;align-items:center;padding-top:6px;margin-top:auto}
-.btn-del{display:flex;align-items:center;gap:5px;padding:7px 13px;border-radius:7px;border:1px solid rgba(224,82,82,0.3);background:rgba(224,82,82,0.1);font-size:11px;color:var(--danger);cursor:pointer;transition:all .15s}
-.btn-del:hover{background:rgba(224,82,82,0.2)}
-.btn-save{display:flex;align-items:center;gap:5px;padding:8px 16px;border-radius:8px;background:linear-gradient(135deg,var(--honey),var(--honey-deep));font-size:11px;font-weight:600;color:var(--dark);cursor:pointer;transition:opacity .15s}
-.btn-save:hover{opacity:.85}
-.tabs{display:flex;gap:6px;margin-bottom:10px}
-.tab{padding:6px 16px;border-radius:20px;font-size:11px;cursor:pointer;border:1px solid var(--border);color:var(--text-muted);background:var(--panel);transition:all .15s}
-.tab:hover{border-color:var(--border-hover);color:var(--text)}
-.tab.active{background:linear-gradient(135deg,var(--honey),var(--honey-deep));border-color:transparent;color:var(--dark);font-weight:700}
-.toast{position:fixed;bottom:20px;right:20px;padding:10px 18px;border-radius:10px;background:var(--panel);border:1px solid var(--border-hover);color:var(--text);font-size:12px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999}
-.toast.show{opacity:1}
-.spin{animation:spin .6s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-</style>
+        body {
+            background: #161009;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            padding: 12px;
+            min-height: 100vh;
+        }
 
-<div style="background:#161009;padding:16px;border-radius:14px;position:relative">
-<div id="toast" class="toast"></div>
+        /* main container: switch to column on mobile */
+        .wf-mobile {
+            display: flex;
+            flex-direction: column;
+            background: var(--dark);
+            border-radius: 20px;
+            border: 1px solid var(--border-hover);
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+        }
 
-<div style="font-size:14px;font-weight:700;color:#F5A623;letter-spacing:.04em;margin-bottom:10px">🐝 HiveSense</div>
+        /* ========= SIDEBAR (transforms to horizontal top bar) ========= */
+        .sb-mobile {
+            background: var(--panel);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            gap: 12px;
+        }
+        .sb-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo-hex {
+            width: 36px;
+            height: 36px;
+            background: rgba(245,166,35,0.18);
+            border: 1px solid rgba(245,166,35,0.4);
+            clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .logo-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--honey);
+            letter-spacing: 0.04em;
+        }
+        /* hive selector as horizontal scroll on mobile */
+        .hive-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            padding: 4px 0 8px;
+            flex: 1;
+            -webkit-overflow-scrolling: touch;
+        }
+        .hv-card {
+            background: var(--panel-light);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 6px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .hv-card.active {
+            background: rgba(245,166,35,0.2);
+            border-color: var(--honey);
+        }
+        .hv-hex-sm {
+            width: 28px;
+            height: 28px;
+            clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
+            background: rgba(245,166,35,0.1);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        .hv-name-sm {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            white-space: nowrap;
+        }
+        .sb-footer-mobile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--panel-light);
+            padding: 6px 14px;
+            border-radius: 40px;
+        }
+        .cal-btn-sm {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: transparent;
+            border: none;
+            font-size: 12px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 6px rgba(82,201,122,0.5);
+        }
+        /* main content area */
+        .mn-mobile {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .topbar-mobile {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .page-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--text);
+            font-family: Georgia, serif;
+        }
+        .refresh-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 30px;
+            border: 1px solid var(--border);
+            background: var(--panel-light);
+            font-size: 12px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        .ricon {
+            width: 13px;
+            height: 13px;
+            border: 2px solid var(--text-dim);
+            border-radius: 50%;
+            border-top-color: transparent;
+        }
+        /* cards grid: 2 columns on mobile, 1 on very small */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 14px;
+        }
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .card:active { background: var(--panel-hover);}
+        .card-body .c-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            letter-spacing: 0.5px;
+        }
+        .c-val {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--honey);
+        }
+        .c-unit {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        /* charts */
+        .sec-box {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 14px;
+        }
+        .sec-head {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .btn-grp {
+            display: flex;
+            gap: 6px;
+        }
+        .dbtn {
+            padding: 4px 12px;
+            border-radius: 30px;
+            border: 1px solid var(--border);
+            background: var(--panel-light);
+            font-size: 11px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        .dbtn.active {
+            background: linear-gradient(135deg, var(--honey), var(--honey-deep));
+            color: var(--dark);
+            font-weight: bold;
+            border-color: transparent;
+        }
+        .chart-wrap {
+            position: relative;
+            width: 100%;
+            height: auto;
+            min-height: 200px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .chart-svg {
+            width: 100%;
+            min-width: 500px;
+            height: 200px;
+            display: block;
+        }
+        /* table scroll */
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 6px;
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            min-width: 560px;
+        }
+        .data-table th, .data-table td {
+            padding: 10px 8px;
+            text-align: left;
+            border-bottom: 1px solid rgba(245,166,35,0.08);
+            color: var(--text-muted);
+        }
+        .pill {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 9px;
+            font-weight: 600;
+        }
+        .pill.a { background: rgba(245,166,35,0.2); color: var(--honey); }
+        .pill.b { background: rgba(79,172,254,0.2); color: #4facfe; }
+        .pill.g { background: rgba(82,201,122,0.2); color: var(--success); }
 
-<div class="tabs">
-  <span class="tab active" onclick="switchTab('dashboard',this)">Dashboard</span>
-  <span class="tab" onclick="switchTab('hivemanager',this)">Hive manager</span>
-  <span class="tab" onclick="switchTab('calendar',this)">Beekeeper's log</span>
-</div>
+        /* tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-size: 13px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+        .tab.active {
+            background: linear-gradient(135deg, var(--honey), var(--honey-deep));
+            color: var(--dark);
+            font-weight: bold;
+            border-color: transparent;
+        }
+        /* overlays fullscreen for mobile */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.94);
+            z-index: 1000;
+            align-items: flex-start;
+            justify-content: center;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        .overlay.open { display: flex; }
+        .modal {
+            background: var(--panel);
+            border-radius: 28px;
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid var(--border-hover);
+            margin: 20px auto;
+            overflow: hidden;
+        }
+        .modal-hdr {
+            display: flex;
+            justify-content: space-between;
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .hm-form-sec, .hm-list {
+            padding: 16px;
+        }
+        .form-row {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .finp {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--dark);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            color: var(--text);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--honey), var(--honey-deep));
+            padding: 10px;
+            text-align: center;
+            border-radius: 30px;
+            font-weight: bold;
+            color: var(--dark);
+            cursor: pointer;
+        }
+        .hm-item {
+            display: flex;
+            justify-content: space-between;
+            background: var(--panel-light);
+            margin-bottom: 8px;
+            padding: 12px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+        }
+        .hmi-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .hmi-btn {
+            background: var(--panel);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        /* calendar for mobile */
+        .cal-modal-body {
+            display: flex;
+            flex-direction: column;
+        }
+        .cal-pane {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+        .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7,1fr);
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .cc {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--panel-light);
+            border-radius: 30px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .cc.today { border: 1px solid var(--honey); color: var(--honey);}
+        .cc.sel { background: var(--honey); color: var(--dark); font-weight: bold;}
+        .note-pane {
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .rating-row {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+        .pip {
+            background: var(--panel-light);
+            padding: 6px 10px;
+            border-radius: 30px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .pip.on { background: var(--honey); color: black; font-weight: bold;}
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: var(--panel);
+            border: 1px solid var(--honey);
+            color: var(--text);
+            padding: 12px;
+            border-radius: 40px;
+            text-align: center;
+            z-index: 1100;
+            opacity: 0;
+            transition: 0.2s;
+            pointer-events: none;
+        }
+        .spin { animation: spin 0.6s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .hidden-view { display: none; }
+        .lupdate { font-size: 10px; color: var(--text-dim); margin-top: 5px; }
+    </style>
+</head>
+<body>
+<div id="toastMsg" class="toast"></div>
+<div class="wf-mobile">
 
-<div class="wf" style="position:relative">
-
-  <!-- SIDEBAR -->
-  <div class="sb">
-    <div class="sb-logo">
-      <div class="logo-hex">🐝</div>
-      <span class="logo-name">HiveSense</span>
-    </div>
-    <div class="sb-sec" onclick="switchTab('hivemanager',null)">
-      Hives
-      <div class="cog-btn" title="Manage hives"><div class="cog-inner"></div></div>
-    </div>
-    <div class="hv-item active" onclick="selectHive(this,'Hive Alpha','North Garden')">
-      <div class="hv-hex"><div class="hv-dot"></div></div>
-      <div class="hv-info"><div class="hv-name">Hive Alpha</div><div class="hv-loc">North Garden</div></div>
-    </div>
-    <div class="hv-item" onclick="selectHive(this,'Hive Beta','South Orchard')">
-      <div class="hv-hex"><div class="hv-dot"></div></div>
-      <div class="hv-info"><div class="hv-name">Hive Beta</div><div class="hv-loc">South Orchard</div></div>
-    </div>
-    <div class="hv-item" onclick="selectHive(this,'Hive Gamma','East Field')">
-      <div class="hv-hex"><div class="hv-dot"></div></div>
-      <div class="hv-info"><div class="hv-name">Hive Gamma</div><div class="hv-loc">East Field</div></div>
-    </div>
-    <div class="sb-footer">
-      <div class="cal-btn" onclick="switchTab('calendar',null)">
-        <span style="font-size:13px">📅</span><span>Beekeeper's Log</span>
-      </div>
-      <div class="status-row"><div class="sdot"></div><span class="stext">System Online</span></div>
-      <div class="lupdate" id="lastUpdate">Last update: 14:22:08</div>
-    </div>
-  </div>
-
-  <!-- MAIN AREA -->
-  <div class="mn">
-    <div class="topbar">
-      <div class="page-title" id="dashTitle">Hive Alpha Dashboard</div>
-      <div class="refresh-btn" onclick="doRefresh(this)">
-        <div class="ricon" id="ricon"></div> Refresh
-      </div>
-    </div>
-    <div class="scroll">
-      <div class="cards">
-        <div class="card t1" onclick="toast('Temperature: live sensor data')">
-          <div class="card-ico"><div class="ico-bars"><span style="height:14px"></span><span style="height:9px"></span><span style="height:5px"></span></div></div>
-          <div class="card-body"><div class="c-label">Temperature</div><div><span class="c-val" id="cTemp">34.2</span><span class="c-unit"> °C</span></div><div class="c-time" id="cTempTime">Updated: 2:22 PM</div></div>
+    <!-- Mobile Sidebar (top bar) -->
+    <div class="sb-mobile">
+        <div class="sb-logo">
+            <div class="logo-hex">🐝</div>
+            <span class="logo-name">HiveSense</span>
         </div>
-        <div class="card t2" onclick="toast('Humidity: live sensor data')">
-          <div class="card-ico"><div style="width:13px;height:17px;border-radius:50% 50% 50% 50%/40% 40% 60% 60%;border:2px solid #4facfe"></div></div>
-          <div class="card-body"><div class="c-label">Humidity</div><div><span class="c-val" id="cHum">68.4</span><span class="c-unit"> %</span></div><div class="c-time">Updated: 2:22 PM</div></div>
+        <div class="hive-scroll" id="mobileHiveList">
+            <!-- dynamic hive chips -->
         </div>
-        <div class="card t3" onclick="toast('Min Today: 29.1°C recorded at 6:14 AM')">
-          <div class="card-ico"><div class="ico-bars"><span style="height:5px"></span><span style="height:9px"></span><span style="height:7px"></span></div></div>
-          <div class="card-body"><div class="c-label">Min Today</div><div><span class="c-val" id="cMin">29.1</span><span class="c-unit"> °C</span></div></div>
+        <div class="sb-footer-mobile">
+            <div class="cal-btn-sm" id="mobileCalBtn">📅 Log</div>
+            <div class="status-dot"></div>
         </div>
-        <div class="card t4" onclick="toast('Max Today: 36.7°C recorded at 1:48 PM')">
-          <div class="card-ico"><div class="ico-bars"><span style="height:14px"></span><span style="height:11px"></span><span style="height:8px"></span></div></div>
-          <div class="card-body"><div class="c-label">Max Today</div><div><span class="c-val" id="cMax">36.7</span><span class="c-unit"> °C</span></div></div>
-        </div>
-      </div>
-
-      <div class="sec-box">
-        <div class="sec-head">
-          <div class="sec-title">Historical trends</div>
-          <div class="btn-grp">
-            <div class="dbtn active" onclick="setRange(this,'7d')">7 days</div>
-            <div class="dbtn" onclick="setRange(this,'14d')">14 days</div>
-            <div class="dbtn" onclick="setRange(this,'30d')">30 days</div>
-          </div>
-        </div>
-        <div class="chart-wrap">
-          <svg class="chart-svg" viewBox="0 0 600 210" preserveAspectRatio="none" id="chartSvg">
-            <defs>
-              <linearGradient id="gA" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F5A623" stop-opacity=".25"/><stop offset="100%" stop-color="#F5A623" stop-opacity="0"/></linearGradient>
-              <linearGradient id="gB" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4facfe" stop-opacity=".18"/><stop offset="100%" stop-color="#4facfe" stop-opacity="0"/></linearGradient>
-            </defs>
-            <line x1="0" y1="50" x2="600" y2="50" stroke="rgba(245,166,35,0.08)" stroke-width="1"/>
-            <line x1="0" y1="100" x2="600" y2="100" stroke="rgba(245,166,35,0.08)" stroke-width="1"/>
-            <line x1="0" y1="150" x2="600" y2="150" stroke="rgba(245,166,35,0.08)" stroke-width="1"/>
-            <polygon id="tempFill" points="0,155 80,130 160,140 240,95 320,108 400,80 480,93 600,65 600,210 0,210" fill="url(#gA)"/>
-            <polygon id="humFill" points="0,170 80,162 160,175 240,152 320,165 400,155 480,168 600,148 600,210 0,210" fill="url(#gB)"/>
-            <polyline id="tempLine" points="0,155 80,130 160,140 240,95 320,108 400,80 480,93 600,65" fill="none" stroke="#F5A623" stroke-width="2.5" stroke-linejoin="round"/>
-            <polyline id="humLine" points="0,170 80,162 160,175 240,152 320,165 400,155 480,168 600,148" fill="none" stroke="#4facfe" stroke-width="2.5" stroke-linejoin="round"/>
-            <g id="tempDots"></g>
-            <g id="humDots"></g>
-            <g id="xLabels"></g>
-          </svg>
-          <div class="chart-legend">
-            <div class="leg-item"><div class="leg-line" style="background:#F5A623"></div>Temp °C</div>
-            <div class="leg-item"><div class="leg-line" style="background:#4facfe"></div>Humidity %</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="sec-box">
-        <div class="sec-head">
-          <div class="sec-title">Daily statistics</div>
-          <select class="tbl-filter" id="tblFilter" onchange="filterTable()">
-            <option>All hives</option><option>Alpha</option><option>Beta</option><option>Gamma</option>
-          </select>
-        </div>
-        <table class="data-table">
-          <thead><tr>
-            <th>Date</th><th>Hive</th><th>Location</th>
-            <th>Avg temp</th><th>Avg humidity</th><th>Max temp</th><th>Min temp</th><th>Readings</th>
-          </tr></thead>
-          <tbody id="tblBody"></tbody>
-        </table>
-      </div>
     </div>
-  </div>
 
-  <!-- HIVE MANAGER OVERLAY -->
-  <div class="overlay" id="ov-hivemanager">
-    <div class="modal">
-      <div class="modal-hdr">
-        <div class="modal-ttl"><span class="modal-ttl-icon">⬡</span> Manage hives</div>
-        <div class="mclose" onclick="closeOverlay('hivemanager')">✕</div>
-      </div>
-      <div class="hm-form-sec">
-        <div class="hm-form-label">Add new hive</div>
-        <div class="form-row">
-          <div class="fg"><label>Hive name <span style="color:#F5A623">*</span></label><input class="finp" id="newHiveName" placeholder="e.g. Hive Delta" type="text"/></div>
-          <div class="fg"><label>Location</label><input class="finp" id="newHiveLoc" placeholder="e.g. West Garden" type="text"/></div>
-        </div>
-        <div class="form-actions"><div class="btn-primary" onclick="addHive()">+ Add hive</div></div>
-      </div>
-      <div class="hm-list" id="hiveList"></div>
+    <!-- Tab navigation -->
+    <div class="tabs" style="padding: 0 16px; margin-top: 8px;">
+        <span class="tab active" data-view="dashboard">Dashboard</span>
+        <span class="tab" data-view="hivemanager">Hive manager</span>
+        <span class="tab" data-view="calendar">Beekeeper's log</span>
     </div>
-  </div>
 
-  <!-- CALENDAR OVERLAY -->
-  <div class="overlay" id="ov-calendar">
-    <div class="modal">
-      <div class="modal-hdr">
-        <div class="modal-ttl"><span class="modal-ttl-icon">📖</span> Beekeeper's log</div>
-        <div class="mclose" onclick="closeOverlay('calendar')">✕</div>
-      </div>
-      <div class="cal-modal-body">
-        <div class="cal-pane">
-          <div class="cal-nav">
-            <div class="cal-nav-btn" onclick="changeMonth(-1)">‹</div>
-            <div class="cal-month" id="calMonthLabel">March 2026</div>
-            <div class="cal-nav-btn" onclick="changeMonth(1)">›</div>
-          </div>
-          <div class="cal-wdays">
-            <div class="cal-wday">Su</div><div class="cal-wday">Mo</div><div class="cal-wday">Tu</div>
-            <div class="cal-wday">We</div><div class="cal-wday">Th</div><div class="cal-wday">Fr</div><div class="cal-wday">Sa</div>
-          </div>
-          <div class="cal-grid" id="calGrid"></div>
+    <!-- DASHBOARD VIEW -->
+    <div id="dashboardView" class="mn-mobile">
+        <div class="topbar-mobile">
+            <div class="page-title" id="dashTitleMobile">Hive Alpha Dashboard</div>
+            <div class="refresh-btn" onclick="doMobileRefresh()">
+                <div class="ricon" id="riconMobile"></div> Refresh
+            </div>
         </div>
-        <div class="note-pane" id="notePane">
-          <div class="note-date-hdr" id="noteDateHdr">Monday, March 30, 2026</div>
-          <div class="insp-sec-label">Hive & colony</div>
-          <div class="insp-row">
-            <div class="fg"><label>Hive</label><div class="ninp">Hive Alpha</div></div>
-            <div class="fg"><label>No. of colonies</label><div class="ninp">2</div></div>
-          </div>
-          <div class="insp-sec-label">Inspection ratings (1–10)</div>
-          <div class="fg"><label style="font-size:9px;color:#A8956B">Colony strength</label><div class="rating-row" id="r1"></div></div>
-          <div class="fg"><label style="font-size:9px;color:#A8956B">Brood pattern (closed)</label><div class="rating-row" id="r2"></div></div>
-          <div class="fg"><label style="font-size:9px;color:#A8956B">Honey store</label><div class="rating-row" id="r3"></div></div>
-          <div class="fg"><label style="font-size:9px;color:#A8956B">Temperament</label><div class="rating-row" id="r4"></div></div>
-          <div class="insp-sec-label">Treatment</div>
-          <div class="insp-row">
-            <div class="fg"><label>Treatment date</label><input class="ninp" type="date" value="2026-03-28" style="cursor:pointer"/></div>
-            <div class="fg"><label>Chemical / brand</label><input class="ninp" type="text" value="Apivar"/></div>
-          </div>
-          <div class="insp-sec-label">Remarks</div>
-          <textarea class="ninp" style="height:50px;align-items:flex-start;padding-top:7px;font-size:10px;resize:none;width:100%">Queen spotted, healthy brood frame on west side.</textarea>
-          <div class="note-actions">
-            <div class="btn-del" onclick="toast('Inspection deleted')">🗑 Delete</div>
-            <div class="btn-save" onclick="toast('Inspection saved!')">💾 Save inspection</div>
-          </div>
+        <div class="cards" id="cardsContainer">
+            <!-- dynamic cards -->
         </div>
-      </div>
+        <div class="sec-box">
+            <div class="sec-head">
+                <div class="sec-title">Historical trends</div>
+                <div class="btn-grp" id="rangeGroup">
+                    <div class="dbtn active" data-range="7d">7d</div>
+                    <div class="dbtn" data-range="14d">14d</div>
+                    <div class="dbtn" data-range="30d">30d</div>
+                </div>
+            </div>
+            <div class="chart-wrap">
+                <svg class="chart-svg" id="mobileChartSvg" viewBox="0 0 500 180" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="gradTemp" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F5A623" stop-opacity="0.3"/><stop offset="100%" stop-color="#F5A623" stop-opacity="0"/></linearGradient>
+                        <linearGradient id="gradHum" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4facfe" stop-opacity="0.2"/><stop offset="100%" stop-color="#4facfe" stop-opacity="0"/></linearGradient>
+                    </defs>
+                    <polygon id="mobileTempFill" fill="url(#gradTemp)"/>
+                    <polygon id="mobileHumFill" fill="url(#gradHum)"/>
+                    <polyline id="mobileTempLine" fill="none" stroke="#F5A623" stroke-width="2.5"/>
+                    <polyline id="mobileHumLine" fill="none" stroke="#4facfe" stroke-width="2.5"/>
+                    <g id="mobileTempDots"></g>
+                    <g id="mobileHumDots"></g>
+                    <g id="mobileXLabels"></g>
+                </svg>
+            </div>
+        </div>
+        <div class="sec-box">
+            <div class="sec-head">
+                <div class="sec-title">Daily statistics</div>
+                <select id="tblFilterMobile" class="tbl-filter" style="background:#2A1E0C; padding: 5px 10px; border-radius: 20px;">
+                    <option>All hives</option><option>Alpha</option><option>Beta</option><option>Gamma</option>
+                </select>
+            </div>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead><tr><th>Date</th><th>Hive</th><th>Temp</th><th>Hum</th><th>Max</th></tr></thead>
+                    <tbody id="mobileTblBody"></tbody>
+                </table>
+            </div>
+            <div class="lupdate" id="lastUpdateMobile">Last update: --:--:--</div>
+        </div>
     </div>
-  </div>
 
-</div><!-- end .wf -->
+    <!-- HIVE MANAGER OVERLAY -->
+    <div id="hivemanagerOverlay" class="overlay">
+        <div class="modal">
+            <div class="modal-hdr"><span>⬡ Manage hives</span><span style="cursor:pointer" onclick="closeOverlay('hivemanager')">✕</span></div>
+            <div class="hm-form-sec">
+                <div class="hm-form-label">Add new hive</div>
+                <div class="form-row">
+                    <input class="finp" id="newHiveName" placeholder="Hive name">
+                    <input class="finp" id="newHiveLoc" placeholder="Location">
+                </div>
+                <div class="btn-primary" onclick="addHiveMobile()">+ Add hive</div>
+            </div>
+            <div class="hm-list" id="hiveListMobile"></div>
+        </div>
+    </div>
+
+    <!-- CALENDAR OVERLAY -->
+    <div id="calendarOverlay" class="overlay">
+        <div class="modal">
+            <div class="modal-hdr"><span>📖 Beekeeper's log</span><span style="cursor:pointer" onclick="closeOverlay('calendar')">✕</span></div>
+            <div class="cal-modal-body">
+                <div class="cal-pane">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span class="cal-nav-btn" onclick="changeMonthMobile(-1)">‹</span>
+                        <span id="calMonthLabelMobile">March 2026</span>
+                        <span class="cal-nav-btn" onclick="changeMonthMobile(1)">›</span>
+                    </div>
+                    <div class="cal-wdays" style="display:grid; grid-template-columns:repeat(7,1fr); text-align:center; margin-top:10px;">
+                        <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                    </div>
+                    <div class="cal-grid" id="mobileCalGrid"></div>
+                </div>
+                <div class="note-pane">
+                    <div id="noteDateHdrMobile" style="color:var(--honey); font-weight:bold;">Monday, March 30, 2026</div>
+                    <div class="fg"><label>Hive</label><input class="finp" value="Hive Alpha"></div>
+                    <div class="fg"><label>Colonies</label><input class="finp" value="2"></div>
+                    <div>Colony strength</div><div class="rating-row" id="rate1"></div>
+                    <div>Brood pattern</div><div class="rating-row" id="rate2"></div>
+                    <div>Honey store</div><div class="rating-row" id="rate3"></div>
+                    <div>Temperament</div><div class="rating-row" id="rate4"></div>
+                    <textarea class="finp" rows="2" placeholder="Remarks...">Queen spotted, healthy</textarea>
+                    <div class="btn-primary" onclick="toastMobile('Inspection saved')">Save inspection</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
-const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
-const DAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    // Data state
+    let currentHive = "Hive Alpha";
+    let currentRange = "7d";
+    let calYear = 2026, calMonth = 2, calSel = 30;
+    const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    let hivesData = [
+        { name: "Hive Alpha", loc: "North Garden", active: true },
+        { name: "Hive Beta", loc: "South Orchard", active: true },
+        { name: "Hive Gamma", loc: "East Field", active: true }
+    ];
+    const tableData = [
+        { date:'Mar 29', hive:'Alpha', cls:'a', avg:'33.4', hum:'67%', max:'36.1' },
+        { date:'Mar 28', hive:'Beta', cls:'b', avg:'31.8', hum:'71%', max:'34.5' },
+        { date:'Mar 27', hive:'Gamma', cls:'g', avg:'32.5', hum:'69%', max:'35.2' },
+        { date:'Mar 26', hive:'Alpha', cls:'a', avg:'32.1', hum:'66%', max:'35.0' },
+    ];
+    const hiveMetrics = {
+        "Hive Alpha": { t:'34.2', h:'68.4', min:'29.1', max:'36.7' },
+        "Hive Beta": { t:'31.8', h:'71.0', min:'28.3', max:'34.5' },
+        "Hive Gamma": { t:'32.5', h:'69.3', min:'27.9', max:'35.2' }
+    };
 
-let calYear=2026,calMonth=2,calSel=30;
-
-const tableData=[
-  {date:'Mar 29, 2026',hive:'Alpha',cls:'a',loc:'North Garden',avg:'33.4°C',hum:'67.2%',max:'36.1°C',min:'29.8°C',r:48},
-  {date:'Mar 28, 2026',hive:'Beta',cls:'b',loc:'South Orchard',avg:'31.8°C',hum:'71.0%',max:'34.5°C',min:'28.3°C',r:48},
-  {date:'Mar 27, 2026',hive:'Gamma',cls:'g',loc:'East Field',avg:'32.5°C',hum:'69.3%',max:'35.2°C',min:'27.9°C',r:48},
-  {date:'Mar 26, 2026',hive:'Alpha',cls:'a',loc:'North Garden',avg:'32.1°C',hum:'65.8%',max:'35.0°C',min:'28.5°C',r:48},
-  {date:'Mar 25, 2026',hive:'Beta',cls:'b',loc:'South Orchard',avg:'30.9°C',hum:'72.1%',max:'33.8°C',min:'27.6°C',r:48},
-];
-
-let hives=[
-  {name:'Hive Alpha',loc:'North Garden',active:true},
-  {name:'Hive Beta',loc:'South Orchard',active:true},
-  {name:'Hive Gamma',loc:'East Field',active:true},
-  {name:'Hive Delta',loc:'West Garden',active:false},
-];
-
-const ratings={r1:7,r2:8,r3:5,r4:3};
-
-function toast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2200);
-}
-
-function switchTab(name,btn){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  if(btn) btn.classList.add('active');
-  else {
-    document.querySelectorAll('.tab').forEach(t=>{
-      if(t.textContent.toLowerCase().includes(name.replace('hivemanager','hive')||name)) t.classList.add('active');
-    });
-  }
-  if(name==='hivemanager') openOverlay('hivemanager');
-  else if(name==='calendar') openOverlay('calendar');
-  else {
-    closeOverlay('hivemanager');closeOverlay('calendar');
-  }
-}
-
-function openOverlay(name){
-  document.getElementById('ov-'+name).classList.add('open');
-  if(name==='hivemanager') renderHiveList();
-  if(name==='calendar') renderCal();
-}
-
-function closeOverlay(name){
-  document.getElementById('ov-'+name).classList.remove('open');
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.querySelector('.tab').classList.add('active');
-}
-
-function selectHive(el,name,loc){
-  document.querySelectorAll('.hv-item').forEach(i=>i.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('dashTitle').textContent=name+' Dashboard';
-  const vals={
-    'Hive Alpha':{t:'34.2',h:'68.4',min:'29.1',max:'36.7'},
-    'Hive Beta':{t:'31.8',h:'71.0',min:'28.3',max:'34.5'},
-    'Hive Gamma':{t:'32.5',h:'69.3',min:'27.9',max:'35.2'},
-  };
-  const v=vals[name]||vals['Hive Alpha'];
-  document.getElementById('cTemp').textContent=v.t;
-  document.getElementById('cHum').textContent=v.h;
-  document.getElementById('cMin').textContent=v.min;
-  document.getElementById('cMax').textContent=v.max;
-  toast('Viewing '+name+' — '+loc);
-}
-
-function doRefresh(btn){
-  const ico=document.getElementById('ricon');
-  ico.classList.add('spin');
-  btn.style.pointerEvents='none';
-  setTimeout(()=>{
-    ico.classList.remove('spin');
-    btn.style.pointerEvents='';
-    const now=new Date();
-    document.getElementById('lastUpdate').textContent='Last update: '+now.toLocaleTimeString();
-    toast('Data refreshed');
-  },1200);
-}
-
-function setRange(el,range){
-  document.querySelectorAll('.dbtn').forEach(b=>b.classList.remove('active'));
-  el.classList.add('active');
-  const configs={
-    '7d':{tPts:'0,155 80,130 160,140 240,95 320,108 400,80 480,93 600,65',hPts:'0,170 80,162 160,175 240,152 320,165 400,155 480,168 600,148',labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun']},
-    '14d':{tPts:'0,160 86,140 172,145 258,110 344,125 430,95 516,105 600,80',hPts:'0,165 86,158 172,170 258,148 344,162 430,150 516,165 600,145',labels:['W1','','W2','','W3','','W4','']},
-    '30d':{tPts:'0,165 86,150 172,130 258,120 344,115 430,100 516,90 600,75',hPts:'0,168 86,165 172,160 258,155 344,150 430,145 516,140 600,132',labels:['Apr 1','','','','Apr 8','','','']},
-  };
-  const c=configs[range];
-  document.getElementById('tempLine').setAttribute('points',c.tPts);
-  document.getElementById('humLine').setAttribute('points',c.hPts);
-  const tFillPts=c.tPts+' 600,210 0,210';
-  const hFillPts=c.hPts+' 600,210 0,210';
-  document.getElementById('tempFill').setAttribute('points',tFillPts);
-  document.getElementById('humFill').setAttribute('points',hFillPts);
-  renderDots(c.tPts,'tempDots','#F5A623',3.5);
-  renderDots(c.hPts,'humDots','#4facfe',3);
-  const lEl=document.getElementById('xLabels');
-  lEl.innerHTML='';
-  const xs=[0,80,160,240,320,400,480,600];
-  c.labels.forEach((l,i)=>{
-    if(xs[i]!==undefined){
-      const t=document.createElementNS('http://www.w3.org/2000/svg','text');
-      t.setAttribute('x',xs[i]);t.setAttribute('y','205');
-      t.setAttribute('fill','#6B5A3A');t.setAttribute('font-size','10');
-      t.textContent=l;lEl.appendChild(t);
+    function toastMobile(msg) {
+        const toast = document.getElementById('toastMsg');
+        toast.textContent = msg;
+        toast.style.opacity = '1';
+        setTimeout(() => toast.style.opacity = '0', 2000);
     }
-  });
-  toast('Showing '+range+' view');
-}
 
-function renderDots(ptsStr,gId,color,r){
-  const g=document.getElementById(gId);g.innerHTML='';
-  ptsStr.split(' ').forEach(p=>{
-    const[x,y]=p.split(',');
-    const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
-    c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',r);c.setAttribute('fill',color);
-    g.appendChild(c);
-  });
-}
+    // render mobile hive chips
+    function renderMobileHiveChips() {
+        const container = document.getElementById('mobileHiveList');
+        container.innerHTML = hivesData.filter(h => h.active).map(h => `
+            <div class="hv-card ${currentHive === h.name ? 'active' : ''}" onclick="selectHiveMobile('${h.name}','${h.loc}')">
+                <div class="hv-hex-sm">🐝</div>
+                <span class="hv-name-sm">${h.name}</span>
+            </div>
+        `).join('');
+    }
 
-function filterTable(){
-  const f=document.getElementById('tblFilter').value;
-  renderTable(f);
-}
+    function selectHiveMobile(name, loc) {
+        currentHive = name;
+        renderMobileHiveChips();
+        document.getElementById('dashTitleMobile').innerHTML = `${name} Dashboard`;
+        const m = hiveMetrics[name] || hiveMetrics["Hive Alpha"];
+        updateCards(m);
+        toastMobile(`Switched to ${name} (${loc})`);
+    }
 
-function renderTable(filter){
-  const tbody=document.getElementById('tblBody');
-  const rows=filter==='All hives'?tableData:tableData.filter(r=>r.hive===filter);
-  tbody.innerHTML=rows.map(r=>`<tr>
-    <td>${r.date}</td><td><span class="pill ${r.cls}">${r.hive}</span></td>
-    <td>${r.loc}</td><td>${r.avg}</td><td>${r.hum}</td>
-    <td>${r.max}</td><td>${r.min}</td><td>${r.r}</td>
-  </tr>`).join('');
-}
+    function updateCards(metrics) {
+        const cardsDiv = document.getElementById('cardsContainer');
+        cardsDiv.innerHTML = `
+            <div class="card" onclick="toastMobile('Temp sensor')"><div><div class="c-label">Temperature</div><div><span class="c-val">${metrics.t}</span><span class="c-unit"> °C</span></div></div></div>
+            <div class="card" onclick="toastMobile('Humidity')"><div><div class="c-label">Humidity</div><div><span class="c-val">${metrics.h}</span><span class="c-unit"> %</span></div></div></div>
+            <div class="card" onclick="toastMobile('Min today')"><div><div class="c-label">Min Today</div><div><span class="c-val">${metrics.min}</span><span class="c-unit"> °C</span></div></div></div>
+            <div class="card" onclick="toastMobile('Max today')"><div><div class="c-label">Max Today</div><div><span class="c-val">${metrics.max}</span><span class="c-unit"> °C</span></div></div></div>
+        `;
+    }
 
-function renderHiveList(){
-  const list=document.getElementById('hiveList');
-  list.innerHTML=hives.map((h,i)=>`
-    <div class="hm-item${h.active?'':' inactive'}">
-      <div>
-        <div class="hmi-name">${h.name}${!h.active?'<span class="hmi-badge">Inactive</span>':''}</div>
-        <div class="hmi-loc">${h.loc}</div>
-      </div>
-      <div class="hmi-actions">
-        ${h.active?`
-          <div class="hmi-btn edit" onclick="editHive(${i})" title="Edit">✎</div>
-          <div class="hmi-btn del" onclick="deleteHive(${i})" title="Delete">🗑</div>
-        `:`
-          <div class="hmi-btn restore" onclick="restoreHive(${i})" title="Restore">↩</div>
-        `}
-      </div>
-    </div>
-  `).join('');
-}
+    // Chart ranges (simplified but responsive)
+    function setRangeMobile(range, btnElem) {
+        currentRange = range;
+        document.querySelectorAll('#rangeGroup .dbtn').forEach(btn => btn.classList.remove('active'));
+        if(btnElem) btnElem.classList.add('active');
+        let pointsTemp = "0,155 80,130 160,140 240,95 320,108 400,80 500,65";
+        let pointsHum = "0,170 80,162 160,175 240,152 320,165 400,155 500,148";
+        if(range === '14d') { pointsTemp = "0,150 60,140 120,145 180,110 240,125 300,95 380,105 460,85 500,78"; pointsHum = "0,168 60,160 120,172 180,150 240,163 300,152 380,165 460,148 500,142"; }
+        if(range === '30d') { pointsTemp = "0,148 70,135 140,125 210,115 280,108 350,95 420,88 500,72"; pointsHum = "0,172 70,165 140,158 210,152 280,148 350,142 420,138 500,132"; }
+        document.getElementById('mobileTempLine').setAttribute('points', pointsTemp);
+        document.getElementById('mobileHumLine').setAttribute('points', pointsHum);
+        document.getElementById('mobileTempFill').setAttribute('points', pointsTemp + " 500,180 0,180");
+        document.getElementById('mobileHumFill').setAttribute('points', pointsHum + " 500,180 0,180");
+        // simple dots
+        const tempDots = document.getElementById('mobileTempDots');
+        tempDots.innerHTML = pointsTemp.split(' ').map(p => { let [x,y]=p.split(','); return `<circle cx="${x}" cy="${y}" r="3" fill="#F5A623"/>`; }).join('');
+        const humDots = document.getElementById('mobileHumDots');
+        humDots.innerHTML = pointsHum.split(' ').map(p => { let [x,y]=p.split(','); return `<circle cx="${x}" cy="${y}" r="2.5" fill="#4facfe"/>`; }).join('');
+    }
 
-function addHive(){
-  const name=document.getElementById('newHiveName').value.trim();
-  const loc=document.getElementById('newHiveLoc').value.trim();
-  if(!name){toast('Hive name is required');return;}
-  hives.push({name,loc:loc||'Unknown',active:true});
-  document.getElementById('newHiveName').value='';
-  document.getElementById('newHiveLoc').value='';
-  renderHiveList();toast('Added '+name);
-}
+    function renderTableMobile() {
+        const filter = document.getElementById('tblFilterMobile').value;
+        const filtered = filter === 'All hives' ? tableData : tableData.filter(r => r.hive === filter);
+        const tbody = document.getElementById('mobileTblBody');
+        tbody.innerHTML = filtered.map(r => `<tr><td>${r.date}</td><td><span class="pill ${r.cls}">${r.hive}</span></td><td>${r.avg}°C</td><td>${r.hum}</td><td>${r.max}°C</td></tr>`).join('');
+    }
 
-function deleteHive(i){
-  hives[i].active=false;
-  renderHiveList();toast(hives[i].name+' deactivated');
-}
+    function doMobileRefresh() {
+        const icon = document.getElementById('riconMobile');
+        icon.classList.add('spin');
+        setTimeout(() => {
+            icon.classList.remove('spin');
+            const now = new Date();
+            document.getElementById('lastUpdateMobile').innerHTML = `Last update: ${now.toLocaleTimeString()}`;
+            toastMobile('Data refreshed');
+        }, 800);
+    }
 
-function restoreHive(i){
-  hives[i].active=true;
-  renderHiveList();toast(hives[i].name+' restored');
-}
+    // Hive manager
+    function renderHiveManagerMobile() {
+        const listDiv = document.getElementById('hiveListMobile');
+        listDiv.innerHTML = hivesData.map((h, idx) => `
+            <div class="hm-item">
+                <div><strong>${h.name}</strong><div style="font-size:10px">${h.loc}</div></div>
+                <div class="hmi-actions">
+                    <span class="hmi-btn" onclick="editHiveMobile(${idx})">✎</span>
+                    <span class="hmi-btn" onclick="toggleHiveActive(${idx})">${h.active ? '🗑' : '↩'}</span>
+                </div>
+            </div>
+        `).join('');
+    }
+    function addHiveMobile() {
+        const name = document.getElementById('newHiveName').value.trim();
+        const loc = document.getElementById('newHiveLoc').value.trim();
+        if (!name) { toastMobile('Enter hive name'); return; }
+        hivesData.push({ name, loc: loc || 'New location', active: true });
+        renderHiveManagerMobile();
+        renderMobileHiveChips();
+        document.getElementById('newHiveName').value = '';
+        document.getElementById('newHiveLoc').value = '';
+        toastMobile(`Added ${name}`);
+    }
+    function editHiveMobile(idx) {
+        const newName = prompt('New hive name', hivesData[idx].name);
+        if(newName) { hivesData[idx].name = newName; renderHiveManagerMobile(); renderMobileHiveChips(); if(currentHive === hivesData[idx].name) currentHive = newName; updateCards(hiveMetrics[currentHive] || hiveMetrics["Hive Alpha"]); toastMobile('Updated'); }
+    }
+    function toggleHiveActive(idx) {
+        hivesData[idx].active = !hivesData[idx].active;
+        renderHiveManagerMobile();
+        renderMobileHiveChips();
+        if(!hivesData[idx].active && currentHive === hivesData[idx].name) {
+            const activeHive = hivesData.find(h => h.active);
+            if(activeHive) selectHiveMobile(activeHive.name, activeHive.loc);
+        }
+        toastMobile(hivesData[idx].active ? 'Restored' : 'Deactivated');
+    }
 
-function editHive(i){
-  const name=prompt('Rename "'+hives[i].name+'" to:',hives[i].name);
-  if(name&&name.trim()){hives[i].name=name.trim();renderHiveList();toast('Hive renamed');}
-}
+    // Calendar mobile
+    function renderCalMobile() {
+        const grid = document.getElementById('mobileCalGrid');
+        const firstDay = new Date(calYear, calMonth, 1).getDay();
+        const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+        let html = '';
+        for(let i=0;i<firstDay;i++) html += '<div class="cc empty" style="opacity:0.3"></div>';
+        for(let d=1; d<=daysInMonth; d++) {
+            let cls = 'cc';
+            if(d === calSel) cls += ' sel';
+            if(calYear===2026 && calMonth===2 && d===30) cls += ' today';
+            html += `<div class="${cls}" onclick="selectDayMobile(${d})">${d}</div>`;
+        }
+        grid.innerHTML = html;
+        document.getElementById('calMonthLabelMobile').innerHTML = `${MONTHS[calMonth]} ${calYear}`;
+        if(calSel) document.getElementById('noteDateHdrMobile').innerHTML = `${MONTHS[calMonth]} ${calSel}, ${calYear}`;
+    }
+    function selectDayMobile(d) { calSel = d; renderCalMobile(); toastMobile(`Selected ${MONTHS[calMonth]} ${d}`); }
+    function changeMonthMobile(dir) {
+        calMonth += dir;
+        if(calMonth>11) { calMonth=0; calYear++; }
+        if(calMonth<0) { calMonth=11; calYear--; }
+        renderCalMobile();
+    }
 
-function changeMonth(dir){
-  calMonth+=dir;
-  if(calMonth>11){calMonth=0;calYear++;}
-  if(calMonth<0){calMonth=11;calYear--;}
-  calSel=null;
-  renderCal();
-}
+    // Rating builder
+    function buildRatingMobile(id, activeVal) {
+        const el = document.getElementById(id);
+        if(!el) return;
+        el.innerHTML = '';
+        for(let i=1;i<=10;i++) {
+            const pip = document.createElement('div');
+            pip.className = `pip ${i <= activeVal ? 'on' : ''}`;
+            pip.innerText = i;
+            pip.onclick = (e) => { e.stopPropagation(); buildRatingMobile(id, i); toastMobile(`Rating ${i}`); };
+            el.appendChild(pip);
+        }
+    }
 
-function renderCal(){
-  const ml=document.getElementById('calMonthLabel');
-  ml.textContent=MONTHS[calMonth]+' '+calYear;
-  const grid=document.getElementById('calGrid');
-  const first=new Date(calYear,calMonth,1).getDay();
-  const days=new Date(calYear,calMonth+1,0).getDate();
-  const noteDots=[3,7,12,15,22,28,30];
-  let html='';
-  for(let i=0;i<first;i++) html+='<div class="cc empty"></div>';
-  for(let d=1;d<=days;d++){
-    const isToday=calYear===2026&&calMonth===2&&d===30;
-    const isSel=d===calSel;
-    const hasDot=noteDots.includes(d);
-    let cls='cc';
-    if(isToday)cls+=' today';
-    if(isSel)cls+=' sel';
-    if(hasDot)cls+=' dot';
-    html+=`<div class="${cls}" onclick="selectDay(${d})">${d}</div>`;
-  }
-  grid.innerHTML=html;
-  updateNoteHdr();
-}
+    // Overlay control + tab
+    function openOverlay(name) {
+        document.getElementById(name+'Overlay').classList.add('open');
+        if(name === 'hivemanager') renderHiveManagerMobile();
+        if(name === 'calendar') { renderCalMobile(); buildRatingMobile('rate1',7); buildRatingMobile('rate2',8); buildRatingMobile('rate3',5); buildRatingMobile('rate4',3); }
+    }
+    function closeOverlay(name) {
+        document.getElementById(name+'Overlay').classList.remove('open');
+    }
 
-function selectDay(d){
-  calSel=d;
-  renderCal();
-  updateNoteHdr();
-}
+    // Tab switching
+    function switchMobileView(viewId) {
+        document.getElementById('dashboardView').style.display = viewId === 'dashboard' ? 'flex' : 'none';
+        document.getElementById('dashboardView').style.flexDirection = 'column';
+        if(viewId === 'hivemanager') openOverlay('hivemanager');
+        else if(viewId === 'calendar') openOverlay('calendar');
+        else { closeOverlay('hivemanager'); closeOverlay('calendar'); }
+    }
 
-function updateNoteHdr(){
-  if(!calSel)return;
-  const date=new Date(calYear,calMonth,calSel);
-  const dayName=DAYS[date.getDay()];
-  const monthName=MONTHS[calMonth];
-  document.getElementById('noteDateHdr').textContent=`${dayName}, ${monthName} ${calSel}, ${calYear}`;
-}
-
-function buildRating(id,active){
-  const el=document.getElementById(id);
-  if(!el)return;
-  el.innerHTML=Array.from({length:10},(_,i)=>`<div class="pip${i<active?' on':''}" onclick="setRating('${id}',${i+1})">${i+1}</div>`).join('');
-}
-
-function setRating(id,val){
-  ratings[id]=val;
-  buildRating(id,val);
-}
-
-// Init
-renderTable('All hives');
-buildRating('r1',7);buildRating('r2',8);buildRating('r3',5);buildRating('r4',3);
-setRange(document.querySelector('.dbtn.active'),'7d');
-renderCal();
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            const view = tab.getAttribute('data-view');
+            if(view === 'dashboard') switchMobileView('dashboard');
+            else if(view === 'hivemanager') switchMobileView('hivemanager');
+            else if(view === 'calendar') switchMobileView('calendar');
+        });
+    });
+    document.getElementById('mobileCalBtn').onclick = () => { switchMobileView('calendar'); document.querySelector('.tab[data-view="calendar"]').classList.add('active'); document.querySelector('.tab[data-view="dashboard"]').classList.remove('active'); };
+    document.getElementById('tblFilterMobile').onchange = () => renderTableMobile();
+    document.querySelectorAll('#rangeGroup .dbtn').forEach(btn => {
+        btn.onclick = (e) => { setRangeMobile(btn.getAttribute('data-range'), btn); };
+    });
+    // init
+    (function init() {
+        renderMobileHiveChips();
+        const metrics = hiveMetrics[currentHive];
+        updateCards(metrics);
+        setRangeMobile('7d', document.querySelector('#rangeGroup .dbtn'));
+        renderTableMobile();
+        doMobileRefresh();
+    })();
 </script>
+</body>
+</html>
